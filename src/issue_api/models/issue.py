@@ -3,10 +3,10 @@ from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 class Issue(BaseModel):
-    id : int
+    id : int | None
     text : str 
     status : str = "open"
-    timestamp : datetime
+    timestamp : datetime | None
     sentiment : str = "unknown"
     category : str = "other"
 
@@ -39,12 +39,12 @@ class Issue(BaseModel):
         if v in ["technical", "payment", "other"]:
             return v
         else:
-            raise ValueError("Недопустимое значение поля category - допустимы techical, payment, other")
+            raise ValueError("Недопустимое значение поля category -допустимы techical, payment, other")
 
-class IssueRequest(Issue):
+class IssueRequest(BaseModel):
     text : str
 
-class IssueResponse(Issue):
+class IssueResponse(BaseModel):
     id : int
     status : str = "open"
     sentiment : str = "unknown"
