@@ -59,18 +59,26 @@ class IssuesProvider:
                     text=issue_data['text']
                 ) 
 
-    async def update(self, issue: Issue) -> bool:
+    async def update(self, issue: Issue) -> Issue | None:
         async with self._session() as s:
             async with s.begin():
-
                 issue_data = issue.model_dump(exclude={'id'})
-
                 stmt = (
                     update(Issues)
                     .where(Issues.id == issue.id)
                     .values(**issue_data)
                 )
-
                 result = await s.execute(stmt)
-
-                return result.rowcount > 0 # обновили ли хотя бы одну строку
+                if result.rowcount == 0:
+                    return None
+                db_issue = await s.get(Issues, issue.id)
+                if db_issue is None:
+                    return None
+                return Issue(
+                    id=db_issue.id, #type: ignore
+                    status=db_issue.status,#type: ignore
+                    timestamp=db_issue.timestamp,#type: ignore
+                    category=db_issue.category,#type: ignore
+                    sentiment=db_issue.sentiment,#type: ignore
+                    text= ""
+                )

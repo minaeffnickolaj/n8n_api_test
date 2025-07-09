@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from issue_api.models.issue import IssueRequest, IssueResponse, Issue
 from issue_api.utils.sentiment import SentimentAPI
+from issue_api.utils.openai import AI
 from issue_api.orm.issues import IssuesProvider
 
 app = FastAPI()
@@ -32,6 +33,18 @@ async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issu
                 sentiment=sentiment,
                 timestamp=None
             )
-            return await db_conn_provider.insert(r)
+            r = await db_conn_provider.insert(r)
+            category = await AI().get_category(r) # идем в гпт за категорией
+            if category:
+                u = Issue(
+                    id=r.id,
+                    text=r.text,
+                    status=r.status,
+                    timestamp=r.timestamp,
+                    sentiment=r.sentiment,
+                    category=category
+                )
+                r = await db_conn_provider.update(u)
+                return r
     except :
         pass
