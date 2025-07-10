@@ -17,10 +17,11 @@ class SentimentAPI:
 
     async def get_sentiment(self, payload: IssueRequest) -> str:
         headers : Dict[str, str]= {"apikey": self._token} # type: ignore
-        content = payload.text.encode("utf-8")
+        content = payload.text.encode("utf-8") #type: ignore
 
         async with httpx.AsyncClient() as client:
             r = await client.post(self._url, headers=headers, content=content)
-            r.raise_for_status()
+            if not r.status_code is 200:
+                return "unknown"
             v = r.json() ## каст к джсонке
             return v["sentiment"]
