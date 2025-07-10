@@ -80,5 +80,5 @@ class IssuesProvider:
                     timestamp=db_issue.timestamp,#type: ignore
                     category=db_issue.category,#type: ignore
                     sentiment=db_issue.sentiment,#type: ignore
-                    text= ""
+                    text= db_issue.text #type: ignore
                 )
