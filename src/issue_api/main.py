@@ -33,18 +33,15 @@ async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issu
                 sentiment=sentiment,
                 timestamp=None
             )
-            r = await db_conn_provider.insert(r)
+            r : Issue = await db_conn_provider.insert(r)
             category = await AI().get_category(r) # идем в гпт за категорией
             if category:
-                u = Issue(
-                    id=r.id,
-                    text=r.text,
-                    status=r.status,
-                    timestamp=r.timestamp,
-                    sentiment=r.sentiment,
-                    category=category
-                )
-                r = await db_conn_provider.update(u)
-                return r
-    except :
-        pass
+                r.category = category
+                r = await db_conn_provider.update(r)
+                return IssueResponse(**r.model_dump())
+            else:
+                raise HTTPException(status_code=500, detail="Internal Server Error")
+        else:
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+    except Exception as e :
+        raise Exception(e)
