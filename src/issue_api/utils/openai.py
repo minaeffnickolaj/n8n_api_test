@@ -3,7 +3,7 @@ import httpx
 from openai import AsyncOpenAI
 from fastapi import HTTPException
 
-from issue_api.models.issue import Issue
+from issue_api.models.issue import Issue, IssueResponse
 
 
 class AI:
@@ -26,7 +26,7 @@ class AI:
                     {"role": "system", "content" : "Ты помощник по определению категорий жалоб"},
                     {"role" : "user", "content" : prompt}
                 ],
-                max_tokens=1,
+                max_tokens=10,
                 temperature=0.0 #детерминируем
             )
             return r.choices[0].message.content.strip().lower() #type: ignore
