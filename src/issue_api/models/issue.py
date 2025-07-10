@@ -1,22 +1,22 @@
-from pydantic import BaseModel, field_validator
-
+from pydantic import BaseModel, field_validator, ConfigDict, Field
 from datetime import datetime
 
 class Issue(BaseModel):
-    id : int | None
-    text : str 
-    status : str = "open"
-    timestamp : datetime | None
-    sentiment : str = "unknown"
-    category : str = "other"
+    id: int | None
+    text: str | None
+    status: str = "open"
+    timestamp: datetime | None
+    sentiment: str = "unknown"
+    category: str = "other"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
     @field_validator("text", mode="before")
     def validate_text(cls, v: str) -> str:
         if len(v) > 0:
-           return v 
+            return v 
         else:
             raise ValueError("Ошибка валидации поля, пустое значение")
         
@@ -39,13 +39,21 @@ class Issue(BaseModel):
         if v in ["technical", "payment", "other"]:
             return v
         else:
-            raise ValueError("Недопустимое значение поля category -допустимы techical, payment, other")
+            raise ValueError("Недопустимое значение поля category - допустимы technical, payment, other")
 
-class IssueRequest(BaseModel):
-    text : str
+class IssueRequest(Issue):
+    id : int | None = Field(default=None, exclude=True)
+    timestamp: datetime | None = Field(default=None, exclude=True)
+    text: str | None
 
-class IssueResponse(BaseModel):
-    id : int
-    status : str = "open"
-    sentiment : str = "unknown"
-    category : str = "other"
+class IssueResponse(Issue):
+    #исключаем поля
+    timestamp: datetime | None = Field(default=None, exclude=True)
+    text: str | None = Field(default=None, exclude=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    status: str = "open"
+    sentiment: str = "unknown"
+    category: str = "other"

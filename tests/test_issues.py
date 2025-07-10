@@ -53,7 +53,7 @@ def test_issue_invalid_sentiment():
         )
 
 def test_issue_invalid_category():
-    with pytest.raises(ValidationError, match="Недопустимое значение поля category - допустимы techical, payment, other"):
+    with pytest.raises(ValueError, match="Недопустимое значение поля category - допустимы technical, payment, other"):
         Issue(
             id=1,
             text="Valid text",
@@ -64,37 +64,24 @@ def test_issue_invalid_category():
         )
 
 def test_issue_request_empty_text():
-    with pytest.raises(ValidationError, match="Ошибка валидации поля, пустое значение"):
+    with pytest.raises(ValueError, match="Ошибка валидации поля, пустое значение"):
         IssueRequest(text="")
 
 # Тесты для модели IssueResponse
 def test_issue_response_valid_data():
     response = IssueResponse(
-        id=1,
-        text="Valid text",
-        timestamp=datetime.now()
+        id=1
     )
     assert response.id == 1
-    assert response.text == "Valid text"
     assert response.status == "open"
     assert response.sentiment == "unknown"
     assert response.category == "other"
 
-def test_issue_response_invalid_text():
-    with pytest.raises(ValidationError, match="Ошибка валидации поля, пустое значение"):
-        IssueResponse(
-            id=1,
-            text="",
-            timestamp=datetime.now()
-        )
-
 def test_issue_response_invalid_status():
-    with pytest.raises(ValidationError, match="Недопустимое значение поля статуса - допустимы open или closed"):
+    with pytest.raises(ValueError, match="Недопустимое значение поля статуса - допустимы open или closed"):
         IssueResponse(
             id=1,
-            text="Valid text",
-            status="invalid",
-            timestamp=datetime.now()
+            status="invalid"
         )
 
 def test_issue_response_invalid_sentiment():
@@ -108,22 +95,16 @@ def test_issue_response_invalid_sentiment():
         )
 
 def test_issue_response_invalid_category():
-    with pytest.raises(ValidationError, match="Недопустимое значение поля category - допустимы techical, payment, other"):
+    with pytest.raises(ValueError, match="Недопустимое значение поля category - допустимы technical, payment, other"):
         IssueResponse(
             id=1,
-            text="Valid text",
-            status="open",
-            timestamp=datetime.now(),
-            sentiment="positive",
             category="invalid"
         )
 
 # Тесты для проверки значений по умолчанию в IssueResponse
 def test_issue_response_default_values():
     response = IssueResponse(
-        id=1,
-        text="Valid text",
-        timestamp=datetime.now()
+        id=1
     )
     assert response.status == "open"
     assert response.sentiment == "unknown"
@@ -161,7 +142,6 @@ def test_issue_response_from_orm():
     mock_issue = MockIssue()
     response = IssueResponse.model_validate(mock_issue)
     assert response.id == 1
-    assert response.text == "Valid text"
     assert response.status == "closed"
     assert response.sentiment == "negative"
     assert response.category == "payment"
