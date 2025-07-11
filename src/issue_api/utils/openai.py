@@ -30,5 +30,5 @@ class AI:
                 temperature=0.0 #детерминируем
             )
             return r.choices[0].message.content.strip().lower() #type: ignore
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="Internal server error")
+        except :
+            return "other" #не стоит падать из-за недоступности, ответим дефолтным значением

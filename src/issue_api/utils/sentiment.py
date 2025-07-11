@@ -20,9 +20,9 @@ class SentimentAPI:
         content = payload.text.encode("utf-8") #type: ignore
 
         async with httpx.AsyncClient() as client:
-            r = await client.post(self._url, headers=headers, content=content)
-            r.raise_for_status()
-            if r.status_code != 200:
+            try:
+                r = await client.post(self._url, headers=headers, content=content)
+                v = r.json() ## каст к джсонке
+                return v["sentiment"]
+            except:
                 return "unknown"
-            v = r.json() ## каст к джсонке
-            return v["sentiment"]
