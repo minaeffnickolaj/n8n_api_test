@@ -49,6 +49,18 @@ class IssueRequest(Issue):
 class IssueResponse(Issue):
     #исключаем поля
     timestamp: datetime | None = Field(default=None, exclude=True)
+    text: str | None = Field(default=None, exclude=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    status: str = "open"
+    sentiment: str = "unknown"
+    category: str = "other"
+
+class IssueResponseDetails(Issue):
+    #исключаем поля
+    timestamp: datetime | None = Field(default=None)
     text: str | None = Field(default=None)
     model_config = ConfigDict(
         from_attributes=True
