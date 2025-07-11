@@ -1,12 +1,13 @@
-from sqlalchemy import Column, String, Integer, DateTime, update, insert
+from sqlalchemy import Column, String, Integer, DateTime, update, select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declarative_base
 
 from datetime import datetime
+from typing import List
 
 import os # доступ к энвам контейнера
 
-from issue_api.models.issue import Issue
+from issue_api.models.issue import Issue, IssueResponse
 
 SQLITE_FALLBACK_DBPATH = './app.db'
 
@@ -82,3 +83,26 @@ class IssuesProvider:
                     sentiment=db_issue.sentiment,#type: ignore
                     text= db_issue.text #type: ignore
                 )
+            
+    async def select(self, created_at : datetime, status : str = "open") -> List[IssueResponse]:
+        async with self._session() as s:
+            async with s.begin():
+                stmt = select(Issues).where(
+                    Issues.status == "open",
+                    Issues.timestamp >= created_at
+                )
+                result = await s.execute(stmt)
+                issues = result.scalars().all()
+
+                result_issues = [
+                    IssueResponse(**Issue(
+                        id=issue.id, #type: ignore
+                        status=issue.status, #type: ignore
+                        timestamp=issue.timestamp, #type: ignore
+                        category=issue.category, #type: ignore
+                        sentiment=issue.sentiment, #type: ignore
+                        text=issue.text #type: ignore
+                    ).model_dump()) for issue in issues
+                ]
+
+                return result_issues

@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
+from typing import List
+from datetime import datetime
+
+
 from issue_api.models.issue import IssueRequest, IssueResponse, Issue
 from issue_api.utils.sentiment import SentimentAPI
 from issue_api.utils.openai import AI
@@ -44,4 +48,25 @@ async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issu
         else:
             raise HTTPException(status_code=500, detail="Internal Server Error")
     except Exception as e :
+        raise Exception(e)
+    
+@app.get("/issues", response_model=List[IssueResponse])
+async def return_issues(created_at : str, status : str = "open", db_conn_provider : IssuesProvider = Depends(get_issues_provider)):
+    try:
+        if status not in ["open", "closed"]:
+            raise HTTPException(status_code=400, detail="Допустимые значения status = open, closed")
+        if created_at == None:
+            raise HTTPException(status_code=400, detail="Не указан начальный интервал")
+        
+        try: #пробуем кастить строку к таймстампу
+            created_at_ts = datetime.fromisoformat(created_at) #type: ignore
+            if created_at_ts > datetime.now(created_at_ts.tzinfo):
+                raise HTTPException(status_code=400, detail="Укажите момент времени в прошлом!")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Неверный формат created_at, ожидается ISO 8601")
+        
+        r = await db_conn_provider.select(created_at=created_at_ts)
+
+        return r
+    except Exception as e:
         raise Exception(e)

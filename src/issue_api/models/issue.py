@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, ConfigDict, Field
+from pydantic import BaseModel, field_validator, ConfigDict, Field, PastDatetime
 from datetime import datetime
 
 class Issue(BaseModel):
