@@ -106,3 +106,19 @@ class IssuesProvider:
                 ]
 
                 return result_issues
+                
+    async def close_issue(self, id : int) -> bool:
+        async with self._session() as s:
+            async with s.begin():
+                stmt = (
+                    update(Issues)
+                    .where(Issues.id == id)
+                    .values(status = "closed")
+                )
+                
+                result = await s.execute(stmt)
+                await s.commit()
+
+                if result.rowcount == 0:
+                    return False
+                return True

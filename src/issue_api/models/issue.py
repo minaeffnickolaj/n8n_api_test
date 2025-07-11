@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, ConfigDict, Field, PastDatetime
+from pydantic import BaseModel, field_validator, ConfigDict, Field
 from datetime import datetime
 
 class Issue(BaseModel):
@@ -49,7 +49,7 @@ class IssueRequest(Issue):
 class IssueResponse(Issue):
     #исключаем поля
     timestamp: datetime | None = Field(default=None, exclude=True)
-    text: str | None = Field(default=None, exclude=True)
+    text: str | None = Field(default=None)
     model_config = ConfigDict(
         from_attributes=True
     )
