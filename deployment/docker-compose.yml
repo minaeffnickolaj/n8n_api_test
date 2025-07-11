@@ -1,6 +1,6 @@
 services:
   issue_api:
-    build: ../.
+    build: ../.env
     ports:
       - "8000:8000"
     restart:
