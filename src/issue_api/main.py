@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from typing import List
 from datetime import datetime
 
-
 from issue_api.models.issue import IssueRequest, IssueResponse, Issue
 from issue_api.utils.sentiment import SentimentAPI
 from issue_api.utils.openai import AI
@@ -26,6 +25,7 @@ async def get_issues_provider():
 def root():
     return JSONResponse({"state":"ok"})
 
+# создание жалобы
 @app.post("/issue", response_model=IssueResponse)
 async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issues_provider)):
     try:
@@ -47,9 +47,13 @@ async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issu
                 raise HTTPException(status_code=500, detail="Internal Server Error")
         else:
             raise HTTPException(status_code=500, detail="Internal Server Error")
-    except Exception as e :
-        raise Exception(e)
-    
+        
+    except HTTPException as e :
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+# возвращаем открытые жалобы созданные с определенного периода времени (можно и больше 1 часа)    
 @app.get("/issues", response_model=List[IssueResponse])
 async def return_issues(created_at : str, status : str = "open", db_conn_provider : IssuesProvider = Depends(get_issues_provider)):
     try:
@@ -68,5 +72,21 @@ async def return_issues(created_at : str, status : str = "open", db_conn_provide
         r = await db_conn_provider.select(created_at=created_at_ts)
 
         return r
+    
+    except HTTPException as e:
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise Exception(e)
+        raise HTTPException(status_code=500, detail="Interval Server Error")
+
+# хук изменения статуса жалобы    
+@app.post("/webhook")
+async def webhook(id : int, db_conn_provider : IssuesProvider = Depends(get_issues_provider)):
+    try:
+        result = await db_conn_provider.close_issue(id)
+        if not result:
+            return JSONResponse({"update" : "false"})
+        return JSONResponse({"update" : "true"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
