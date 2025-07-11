@@ -21,6 +21,11 @@ class SentimentAPI:
 
         async with httpx.AsyncClient() as client:
             r = await client.post(self._url, headers=headers, content=content)
+<<<<<<< Updated upstream
             r.raise_for_status()
+=======
+            if r.status_code != 200:
+                return "unknown"
+>>>>>>> Stashed changes
             v = r.json() ## каст к джсонке
             return v["sentiment"]
