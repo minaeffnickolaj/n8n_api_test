@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from typing import List
 from datetime import datetime
 
-from issue_api.models.issue import IssueRequest, IssueResponse, Issue
+from issue_api.models.issue import IssueRequest, IssueResponse, Issue, IssueResponseDetails
 from issue_api.utils.sentiment import SentimentAPI
 from issue_api.utils.openai import AI
 from issue_api.orm.issues import IssuesProvider
@@ -54,7 +54,7 @@ async def create_issue(issue : IssueRequest, db_conn_provider = Depends(get_issu
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # возвращаем открытые жалобы созданные с определенного периода времени (можно и больше 1 часа)    
-@app.get("/issues", response_model=List[IssueResponse])
+@app.get("/issues", response_model=List[IssueResponseDetails])
 async def return_issues(created_at : str, status : str = "open", db_conn_provider : IssuesProvider = Depends(get_issues_provider)):
     try:
         if status not in ["open", "closed"]:
