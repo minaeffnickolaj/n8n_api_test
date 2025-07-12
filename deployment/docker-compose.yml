@@ -7,3 +7,14 @@ services:
       "unless-stopped"
     env_file:
       - ".env"
+
+  n8n:
+    image: n8nio/n8n:1.102.1
+    ports:
+      - "5678:5678"
+    restart: unless-stopped
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
